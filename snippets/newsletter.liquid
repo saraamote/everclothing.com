@@ -1,0 +1,29 @@
+<div class="newsletter {% if newsletter == 'center' %}center{% endif %}">
+  <p class="message"></p>
+  {% if settings.newsletter_system == 'mailchimp' %}
+    <form action="{{ settings.mailchimp_link }}" method="post" name="mc-embedded-subscribe-form" class="contact-form" target="_blank">
+      {% comment %}
+        <input type="text" value="" name="FNAME" placeholder="{{ 'general.newsletter_form.first_name' | t }}">
+        <input type="text" value="" name="LNAME" placeholder="{{ 'general.newsletter_form.last_name' | t }}">
+      {% endcomment %}
+      <input type="email" value="" name="EMAIL" class="contact_email" placeholder="{{ 'general.newsletter_form.placeholder' | t }}">
+      <input type="submit" value="{{ 'general.newsletter_form.submit' | t }}" class="action_button sign_up" name="subscribe" />
+    </form>
+  {% else %}
+    {% form 'customer' %}
+       {% if form.posted_successfully? %}
+         <p><em>{{ 'general.newsletter_form.success_text' | t }}</em></p>
+       {% elsif form.errors %}
+         {% for field in form.errors %}
+           <p><em>{{ field }} - {{ form.errors.messages[field] }}</em></p>
+         {% endfor %}
+       {% endif %}
+
+       <input type="hidden" name="contact[tags]" value="prospect,newsletter"/>
+       <input type="hidden" name="contact[first_name]" value="{{ 'general.newsletter_form.subscriber_first_name' | t }}" />
+       <input type="hidden" name="contact[last_name]" value="{{ 'general.newsletter_form.subscriber_last_name' | t }}" />
+       <input type="email" class="contact_email" name="contact[email]" required pattern="[^ @]*@[^ @]*" placeholder="{{ 'general.newsletter_form.placeholder' | t }}" />
+       <input type='submit' class="action_button sign_up" value="{{ 'general.newsletter_form.submit' | t }}" />
+     {% endform %}
+  {% endif %}
+</div>

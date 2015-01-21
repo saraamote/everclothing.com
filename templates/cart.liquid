@@ -1,0 +1,117 @@
+<div class="sixteen columns clearfix collection_nav">
+  <h1 class="collection_title">{{ 'cart.general.title' | t }}</h1>
+
+  {% if cart.item_count > 0 %}
+    <div class="continue_shopping">
+      <a href="{% if cart.items.first.product.collections != blank %}{{ cart.items.first.product.collections.last.url }}{% else %}/collections/all{% endif %}">{{ 'cart.general.continue_shopping_link_html' | t }}</a>
+    </div>
+  {% endif %}
+</div>
+
+  {% if cart.item_count == 0 %}
+    <div class="sixteen columns">
+      <div class="section clearfix">
+        <p class="quote">{{ 'cart.general.continue_browsing_html' | t }}</p>
+        <br class="clear" />
+
+        {% assign collection = '' %}
+        {% assign products = collections[settings.frontpage_collection].products %}
+        {% assign products_per_row = settings.frontpage_products_per_row %}
+        {% include 'product-loop' %}
+      </div>
+    </div>
+  {% else %}
+
+  <form action="/cart" method="post" id="cart_form">
+    <div class="section clearfix">
+      <div class="ten columns cart_items">
+        <h4 class="title">{{ 'cart.general.products' | t }}</h4>
+
+        {% for item in cart.items %}
+          <div class="five columns alpha">
+            <a href="{{ item.url }}" title="{{ item.title | escape }}" class="cart_page_image">
+              <img src="{{ 'loader.gif' | asset_url }}" data-src="{{ item | img_url: 'medium' }}" data-src-retina="{{ item | img_url: 'grande' }}" alt="{{ item.title | escape }}" />
+            </a>
+          </div>
+
+          <div class="five columns omega">
+            <p>
+              <a href="{{ item.url }}" title="{{ item.title | escape }}">{{ item.title }}</a>
+            </p>
+
+            {% if item.properties %}
+              <p>
+              {% for p in item.properties %}
+                {% unless p.last == blank %}
+                  {% if p.last contains '/uploads/' %}
+                    {{ p.first }}: <a class="lightbox" href="{{ p.last }}">{{ 'cart.general.uploaded_file' | t }}</a><br />
+                  {% else %}
+                    {{ p.first }}: {{ p.last }}<br />
+                  {% endif %}
+                {% endunless %}
+              {% endfor %}
+              </p>
+            {% endif %}
+
+            <p class="price_total">
+              {{ item.price | money_with_currency }}
+            </p>
+
+            <p id="quantity_{{ forloop.index }}">
+              <label for="updates_{{ item.id }}" class="quantity_label">{{ 'cart.general.quantity' | t }}:</label>
+              <input type="number" min="0" size="3" maxlength="3" class="quantity" name="updates[]" id="updates_{{ item.id }}" value="{{ item.quantity }}" />
+            </p>
+
+            <p class="remove_item">
+              <a href="/cart/change?line={{ forloop.index }}&amp;quantity=0" title="{{ 'cart.general.remove' | t }}">{{ 'cart.general.remove' | t }}</a>
+            </p>
+          </div>
+          <br class="clear" />
+          <br class="clear" />
+        {% endfor %}
+      </div>
+
+      <div class="five columns offset-by-one">
+        <h4 class="subtotal">
+          {{ 'cart.general.subtotal' | t }}
+        </h4>
+
+        <p class="subtotal_amount">
+          <strong>{{ cart.total_price | money_with_currency }}</strong>
+          <small id="estimated-shipping" style="display:none">+ <em>{{ 0 | money }} {{ 'cart.shipping_calculator.estimated_shipping' | t }}</em></small>
+
+          {% unless settings.tax_included %}
+            <small class="excluding_tax"><em>{{ 'cart.general.excluding_tax_shipping' | t }}</em></small>
+          {% endunless %}
+        </p>
+
+        {% if settings.show_multiple_currencies %}
+          <p>
+            <small>
+              {{ 'cart.general.orders_processed_in_currency_html' | t: currency: shop.currency }}
+            </small>
+          </p>
+        {% endif %}
+
+        {% if settings.display_special_instructions %}
+          <label for="note">{{ 'cart.general.note' | t: shop_name: shop.name }}:</label>
+          <textarea id="note" name="note" rows="2">{{ cart.note }}</textarea>
+        {% endif %}
+
+        <p>
+          <input type="submit" class="action_button add_to_cart" id="checkout" name="checkout" value="{{ 'cart.general.checkout' | t }}" />
+        </p>
+
+        {% if settings.display_additional_checkout and additional_checkout_buttons %}
+          <p class="center">
+            {{ content_for_additional_checkout_buttons | google_button_options: 'transparent' }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
+  {% include 'cart-shipping-calculator' %}
+  <br class="clear" />
+  <br class="clear" />
+{% endif %}

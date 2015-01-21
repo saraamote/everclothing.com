@@ -1,0 +1,35 @@
+{% capture current_url %}{% if social-buttons == 'article' %}{{ shop.url }}{{ article.url }}{% else %}{{ canonical_url }}{% endif %}{% endcapture %}
+
+{% capture buttons %}
+<span class="social_buttons">
+  {{ 'layout.social_sharing.title' | t }}:
+
+  {% capture title %}{% if social-buttons == 'article' %}{{ article.title }}{% else %}{{ product.title }}{% endif %}{% endcapture %}
+
+  {% capture twitter_name %}{% if settings.twitter_username != '' %}@{{ settings.twitter_username }}{% else %}{{ shop.name }}{% endif %}{% endcapture %}
+
+    <a href="https://twitter.com/intent/tweet?text={{ 'layout.social_sharing.twitter_share' | t: current_url: current_url, title: title, name: twitter_name }}" target="_blank" class="icon-twitter" title="{{ 'layout.social_sharing.twitter_title' | t }}"></a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ current_url }}" target="_blank" class="icon-facebook" title="{{ 'layout.social_sharing.facebook_title' | t }}"></a>
+
+    {% if social-buttons != 'article' %}
+      <a href="//pinterest.com/pin/create/button/?url={{ current_url }}&amp;media={{ product.featured_image | product_img_url: 'master' | replace: '//cdn', 'http://cdn' | replace: 'http:http://', 'http://' | remove: 'https:' }}&amp;description={{ 'layout.social_sharing.pinterest_share' | t: title: title, name: shop.name }}" target="_blank" class="icon-pinterest" title="{{ 'layout.social_sharing.pinterest_title' | t }}"></a>&nbsp;
+    {% endif %}
+
+    <a href="mailto:?subject={{ 'layout.social_sharing.email_subject' | t: title: title }}&amp;body={{ 'layout.social_sharing.email_message' | t: title: title, name: shop.name }}%0D%0A%0D%0A{{ current_url }}" target="_blank" class="icon-mail" title="{{ 'layout.social_sharing.email_title' | t }}"></a>
+</span>
+
+{% endcapture %}
+
+{% if social-buttons == 'article' and settings.display_social_buttons_blog  %}
+  <div class="social_buttons">
+    {{ buttons }}
+  </div>
+{% elsif social-buttons == 'global' and settings.header_share_button %}
+  <div class="social_buttons right">
+    {{ buttons }}
+  </div>
+{% elsif social-buttons == 'product' and settings.display_social_buttons %}
+  <hr />
+  {{ buttons }}
+{% endif %}

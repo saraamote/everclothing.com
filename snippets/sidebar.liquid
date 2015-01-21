@@ -1,0 +1,119 @@
+<div class="sidebar four columns">
+  {% if settings.collection_top_sidebar_page != blank %}
+    <h4>{{ pages[settings.collection_top_sidebar_page].title }}</h4>
+    {{ pages[settings.collection_top_sidebar_page].content }}
+  {% endif %}
+
+  {% if settings.collection_sidebar_linklist != blank %}
+    <h4 class="toggle"><span>+</span>{{ linklists[settings.collection_sidebar_linklist].title }}</h4>
+    <ul class="blog_list toggle_list">
+      {% for link in linklists[settings.collection_sidebar_linklist].links %}
+        <li>
+          <a {% if link.active %}class="active"{% endif %} href="{{ link.url }}" title="{{ link.title | escape }}">{{ link.title }}</a>
+
+          {% if linklists[link.handle] != empty %}
+            {% assign display_sublinks = false %}
+
+            {% for link in linklists[link.handle].links %}
+              {% if link.active %}
+                {% assign display_sublinks = true %}
+              {% endif %}
+            {% endfor %}
+
+            {% if display_sublinks or link.active %}
+              <ul>
+              {% for link in linklists[link.handle].links %}
+                <li>
+                  <a {% if link.active %}class="active"{% endif %} href="{{ link.url }}" title="{{ link.title }}">{{ link.title }}</a>
+                </li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if settings.collection_sidebar_linklist2 != blank %}
+    <h4 class="toggle"><span>+</span>{{ linklists[settings.collection_sidebar_linklist2].title }}</h4>
+    <ul class="blog_list toggle_list">
+      {% for link in linklists[settings.collection_sidebar_linklist2].links %}
+        <li>
+          <a {% if link.active %}class="active"{% endif %} href="{{ link.url }}" title="{{ link.title | escape }}">{{ link.title }}</a>
+
+          {% if linklists[link.handle] != empty %}
+            {% assign display_sublinks = false %}
+
+            {% for link in linklists[link.handle].links %}
+              {% if link.active %}
+                {% assign display_sublinks = true %}
+              {% endif %}
+            {% endfor %}
+
+            {% if display_sublinks or link.active %}
+              <ul>
+              {% for link in linklists[link.handle].links %}
+                <li>
+                  <a {% if link.active %}class="active"{% endif %} href="{{ link.url }}" title="{{ link.title }}">{{ link.title }}</a>
+                </li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% assign tag_count = collection.all_tags | size %}
+  {% if settings.filter_by_tag and tag_count > 0 %}
+    <h4 class="toggle"><span>+</span>{{ 'collections.sidebar.tags' | t }}</h4>
+    <ul class="blog_list toggle_list">
+      <li>
+        <a {% unless current_tags %}class="active"{% endunless %} href="{% if collection.handle == "all" %}/collections/all{% else %}{{ collection.url }}{% endif %}">All {{ collection.title }}</a>
+      </li>
+      {% for tag in collection.all_tags %}
+        {% unless tag contains 'meta-related-collection-' %}
+          <li>
+            <a {% if current_tags contains tag %}class="active"{% endif %} href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}">{{ tag }}</a>
+          </li>
+        {% endunless %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if settings.filter_by_category %}
+    <h4 class="toggle"><span>+</span>{{ 'collections.sidebar.collections' | t }}</h4>
+    <ul class="blog_list toggle_list">
+      {% for col in collections %}
+        {% unless col.handle == 'frontpage' %}
+          <li {% if col.handle == collection.handle %}class="active"{% endif %}><a href="{{ col.url }}" title="{{ col.title | escape }}">{{ col.title }}</a></li>
+        {% endunless %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if settings.collection_sidebar_products %}
+    <h4 class="toggle"><span>+</span>{{ 'collections.sidebar.product_types' | t }}</h4>
+    <ul class="blog_list toggle_list">
+      {% for product_type in shop.types %}
+        <li {% if product_type == collection.title %}class="active"{% endif %}>{{ product_type | link_to_type }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if settings.collection_sidebar_vendors %}
+    <h4 class="toggle"><span>+</span>{{ 'collections.sidebar.vendors' | t }}</h4>
+    <ul class="blog_list toggle_list">
+      {% for product_vendor in shop.vendors %}
+        <li {% if product_vendor == collection.title %}class="active"{% endif %}>{{ product_vendor | link_to_vendor }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if settings.collection_sidebar_page != blank %}
+    <h4>{{ pages[settings.collection_sidebar_page].title }}</h4>
+    {{ pages[settings.collection_sidebar_page].content }}
+  {% endif %}
+</div>

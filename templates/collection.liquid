@@ -1,0 +1,98 @@
+{% paginate collection.products by settings.pagination_limit %}
+
+  <div class="sixteen columns breadcrumb clearfix">
+    <div class="eight columns breadcrumb_text alpha">
+      <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="url"><span itemprop="title">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
+      &nbsp; / &nbsp;
+      <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="{{ collection.url }}" title="{{ collection.title | escape }}" itemprop="url"><span itemprop="title">{{ collection.title }}</span></a></span>
+      {% if current_tags %}
+        {% for tag in current_tags %}
+          &nbsp; / &nbsp;
+          <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}" title="{{ tag | escape }}" itemprop="url"><span itemprop="title">{{ tag }}</span></a></span>
+        {% endfor %}
+      {% endif %}
+
+      {% if paginate.pages != 0 %}
+        &nbsp; / &nbsp; {{ 'general.breadcrumbs.page' | t: current_page: paginate.current_page, pages: paginate.pages }}
+      {% endif %}
+    </div>
+
+    {% if collection.handle != blank and collection.products_count > 0 %}
+      {% if settings.collection_tags %}
+        <div class="four columns section_select {% unless settings.collection_sort %}offset-by-four omega{% endunless %}">
+          {% for tag in collection.all_tags %}
+            {% if forloop.first %}
+              <label for="tag_filter" class="inline">{{ 'collections.sorting.filter' | t }}: </label>
+              <select name="tag_filter" id="tag_filter">
+                <option {% unless current_tags %}selected="selected"{% endunless %} value="{% if collection.handle == "all" %}/collections/all{% else %}{{ collection.url }}{% endif %}">{{ 'collections.general.all_collection_title' | t: title: collection.title }}</option>
+            {% endif %}
+
+            {% unless tag contains 'meta-related-collection-' %}
+              <option {% if current_tags contains tag %}selected="selected"{% endif %} value="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}">{{ tag }}</option>
+            {% endunless %}
+
+            {% if forloop.last %}
+              </select>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+     {% if settings.collection_sort %}
+        <div class="four columns section_select omega {% unless settings.collection_tags %}offset-by-four{% endunless %}">
+          <label for="sort-by" class="inline">{{ 'collections.sorting.title' | t }}: </label>
+          <select id="sort-by">
+            <option value="manual">{{ 'collections.sorting.featured' | t }}</option>
+            <option value="best-selling">{{ 'collections.sorting.best_selling' | t }}</option>
+            <option value="title-ascending">{{ 'collections.sorting.az' | t }}</option>
+            <option value="title-descending">{{ 'collections.sorting.za' | t }}</option>
+            <option value="price-ascending">{{ 'collections.sorting.price_ascending' | t }}</option>
+            <option value="price-descending">{{ 'collections.sorting.price_descending' | t }}</option>
+            <option value="created-descending">{{ 'collections.sorting.date_descending' | t }}</option>
+            <option value="created-ascending">{{ 'collections.sorting.date_ascending' | t }}</option>
+          </select>
+          <script type="text/javascript">
+            // <![CDATA[
+              $('#sort-by')
+                .val('{{ collection.sort_by | default: collection.default_sort_by  }}')
+                .bind('change', function() {
+                  Shopify.queryParams.sort_by = $(this).val();
+                  location.search = $.param(Shopify.queryParams);
+              });
+            // ]]>
+          </script>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {% if settings.collection_sidebar %}
+    {% include 'sidebar' %}
+    <div class="twelve columns">
+  {% else %}
+    <div class="sixteen columns">
+  {% endif %}
+
+    {% if settings.display_collection_title %}
+      <h1>{{ collection.title }}</h1>
+    {% endif %}
+
+    {% if collection.description != blank %}
+      <div class="section clearfix collection_description">
+        {{ collection.description }}
+      </div>
+    {% endif %}
+
+    {% if collection.products.size == 0 %}
+      <div class="section clearfix">
+        <p class="quote">{{ 'collections.general.no_matches' | t }}</p>
+      </div>
+    {% else %}
+      {% assign products = collection.products %}
+      {% assign products_per_row = settings.products_per_row %}
+      {% include 'product-loop' with settings.collection_sidebar %}
+    {% endif %}
+
+    {% include 'pagination' with settings.collection_sidebar %}
+  </div>
+{% endpaginate %}

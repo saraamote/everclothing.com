@@ -1,0 +1,188 @@
+<div class="sixteen columns">
+  <div class="clearfix breadcrumb">
+    <div class="right mobile_hidden">
+      {% if collection.previous_product %}
+        {% capture prev_url %}{{ collection.previous_product }}{% endcapture %}
+        {{ 'products.general.previous_product_html' | t | link_to: prev_url }}
+        {% if collection.next_product %}&nbsp; | &nbsp;{% endif %}
+      {% endif %}
+
+      {% if collection.next_product %}
+        {% capture next_url %}{{ collection.next_product }}{% endcapture %}
+        {{ 'products.general.next_product_html' | t | link_to: next_url }}
+      {% endif %}
+    </div>
+
+    <div class="breadcrumb_text">
+      <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="url"><span itemprop="title">{{ 'general.breadcrumbs.home' | t }}</span></a></span>
+      &nbsp; / &nbsp;
+      <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+        {% if collection %}
+          <a href="{{ collection.url }}" title="{{ collection.title | escape }}">{{ collection.title }}</a>
+        {% else %}
+          <a href="/collections/all" title="{{ collections.all.title }}">{{ collections.all.title }}</a>
+        {% endif %}
+      </span>
+      &nbsp; / &nbsp;
+      {{ product.title }}
+    </div>
+  </div>
+</div>
+
+{% if settings.product_sidebar %}
+  {% include 'sidebar' %}
+  <div class="twelve columns" itemscope itemtype="http://data-vocabulary.org/Product">
+    <div id="product-{{ product.id }}">
+{% else %}
+  <div class="sixteen columns" itemscope itemtype="http://data-vocabulary.org/Product">
+    <div id="product-{{ product.id }}">
+{% endif %}
+
+
+	<div class="section product_section clearfix">
+
+  	 {% if settings.product_images_position == 'left' %}
+       <div class="{% if settings.product_sidebar %}seven{% else %}nine{% endif %} columns {% if product-images == blank %}{% if settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}{% endif %}">
+         {% include 'product-images' %}
+        </div>
+     {% endif %}
+
+     <div class="{% if settings.product_sidebar %}five{% else %}seven{% endif %} columns {%if settings.product_images_position == 'left' %}omega{% else %}alpha{% endif %}">
+       <h1 class="product_name" itemprop="name">{{ product.title }}</h1>
+       {% if settings.display_vendor %}
+          <p class="vendor">
+            <span itemprop="brand">{{ product.vendor | link_to_vendor }}</span>
+          </p>
+       {% endif %}
+
+      {% assign variant = product.selected_or_first_available_variant %}
+      <p class="modal_price" itemprop="offerDetails" itemscope itemtype="http://data-vocabulary.org/Offer">
+         <meta itemprop="currency" content="{{ shop.currency }}" />
+         <meta itemprop="seller" content="{{ shop.name | escape }}" />
+         <meta itemprop="availability" content="{% if product.available %}in_stock{% else %}out_of_stock{% endif %}" />
+
+         <span class="sold_out">{% if variant.available == false %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
+         <span itemprop="price" content="{{ variant.price | money_without_currency }}" class="{% if variant.compare_at_price > variant.price %}sale{% endif %}">
+            <span class="current_price">
+              {% if variant.available %}
+                {{ variant.price | money }}
+              {% endif %}
+            </span>
+         </span>
+         <span class="was_price">
+          {% if variant.price < variant.compare_at_price %}
+            {{ variant.compare_at_price | money }}
+          {% endif %}
+         </span>
+      </p>
+
+      {% include 'product-notify-me' %}
+
+       {% if settings.product_description_position == "top" %}
+         {% if product.description != blank %}
+          <div class="description" itemprop="description">
+            {{ product.description | split: '<!-- split -->' | first }}
+          </div>
+        {% endif %}
+       {% endif %}
+
+       {% include 'product-form' with 'product' %}
+
+       {% if settings.product_description_position == "bottom" %}
+         {% if product.description != blank %}
+          <div class="description" itemprop="description">
+           {{ product.description | split: '<!-- split -->' | first }}
+          </div>
+         {% endif %}
+       {% endif %}
+
+      {% if settings.display_collections or settings.display_tags or settings.display_type %}
+       <hr />
+      {% endif %}
+
+       <div class="meta">
+         {% if settings.display_collections %}
+           <p>
+             <span class="label">{{ 'products.product.collections' | t }}:</span>
+             <span>
+              {% for col in product.collections %}
+                <a href="{{ col.url }}" title="{{ col.title }}">{{ col.title }}</a>{% unless forloop.last %},{% endunless %}
+              {% endfor %}
+            </span>
+          </p>
+         {% endif %}
+
+         {% if settings.display_tags %}
+            <p>
+              {% for tag in product.tags %}
+                {% if forloop.first %}
+                  <span class="label">{{ 'products.product.tags' | t }}:</span>
+                {% endif %}
+
+                {% unless tag contains 'meta-related-collection-' %}
+                  <span>
+                    <a href="/collections/{% if collection %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handle }}" title="{{ 'products.product.products_tagged' | t: tag: tag }}">{{ tag }}</a>{% unless forloop.last %},{% endunless %}
+                  </span>
+                {% endunless %}
+              {% endfor %}
+            </p>
+         {% endif %}
+
+        {% if settings.display_type %}
+           <p>
+             <span class="label">{{ 'products.product.product_types' | t }}:</span>
+             <span itemprop="category">{{ product.type | link_to_type }}</span>
+           </p>
+        {% endif %}
+       </div>
+
+      {% include "social-buttons" with "product" %}
+    </div>
+
+    {% if settings.product_images_position == 'right' %}
+      <div class="{% if settings.product_sidebar %}six{% else %}eight{% endif %} columns {% if product-images == blank %}{% if settings.product_images_position == 'left' %}alpha{% else %}omega{% endif %}{% endif %}">
+        {% include 'product-images' %}
+        {% include "social-buttons" with "product" %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if product.description contains "<!-- split -->"  %}
+    <br class="clear" />
+    <div class="section clearfix">
+      <div class="description">
+        {{ product.description | split: '<!-- split -->' | last }}
+      </div>
+    </div>
+  {% endif %}
+  </div>
+
+  {% if settings.display_related_products %}
+    {% capture limit %}{{ settings.products_per_row | plus: 1 }}{% endcapture %}
+
+    {% if collection and collection.all_products_count > 1 %}
+      {% assign col = collection.handle %}
+    {% else %}
+      {% assign col = product.collections.last.handle %}
+    {% endif %}
+
+    {% for tag in product.tags %}
+      {% if tag contains 'meta-related-collection-' %}
+        {% assign col = tag | remove: 'meta-related-collection-' %}
+        {% assign collection = collections[col] %}
+        {% capture limit %}{{ collection.products_count | plus: 1 }}{% endcapture %}
+      {% endif %}
+    {% endfor %}
+
+    {% if col and collections[col].all_products_count > 0 %}
+      <br class="clear" />
+      <br class="clear" />
+      <h4 class="title center">{{ 'products.product.related_items' | t }}</h4>
+
+      {% assign skip_product = product %}
+      {% assign products = collections[col].products %}
+      {% assign products_per_row = settings.products_per_row %}
+      {% include 'product-loop' with settings.product_sidebar %}
+    {% endif %}
+  {% endif %}
+</div>
